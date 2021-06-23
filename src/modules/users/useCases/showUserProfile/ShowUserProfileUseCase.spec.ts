@@ -2,6 +2,7 @@ import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUs
 import { AuthenticateUserUseCase } from "../authenticateUser/AuthenticateUserUseCase";
 import { CreateUserUseCase } from "../createUser/CreateUserUseCase";
 import { ICreateUserDTO } from "../createUser/ICreateUserDTO";
+import { ShowUserProfileError } from "./ShowUserProfileError";
 
 import { ShowUserProfileUseCase } from "./ShowUserProfileUseCase";
 
@@ -31,12 +32,20 @@ describe("Show User Profile", () => {
       password: user.password
     });
 
-    if (createdUser.id) {
-      const result = await showUserProfileUseCase.execute(createdUser.id);
+    expect(createdUser).toHaveProperty("id");
 
-      expect(result.name).toEqual(user.name);
-      expect(result.email).toEqual(user.email);
-    }
+    const result = await showUserProfileUseCase.execute(createdUser.id as string);
 
+    expect(result.name).toEqual(user.name);
+    expect(result.email).toEqual(user.email);
+
+
+  });
+
+  it("should not be able to list un-existing user's profile", async () => {
+    expect(async () => {
+      const user_id = "abc12123231231"
+      await showUserProfileUseCase.execute(user_id)
+    }).rejects.toBeInstanceOf(ShowUserProfileError)
   })
 })
