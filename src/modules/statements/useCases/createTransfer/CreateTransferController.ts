@@ -4,18 +4,21 @@ import { container } from "tsyringe";
 import { CreateTransferUseCase } from "./CreateTransferUseCase";
 
 class CreateTransferController {
-  async handle(request: Request, response: Response) {
-    const { user_id: receiveUserId } = request.params;
+  async execute(request: Request, response: Response) {
+    const { id: sender_id } = request.user;
     const { amount, description } = request.body;
+    const { receiver_id } = request.params;
 
     const createTransferUseCase = container.resolve(CreateTransferUseCase);
 
-    await createTransferUseCase.execute({
+    const transfer = await createTransferUseCase.execute({
       amount,
       description,
-      receiveUserId,
-      senderUserId: request.user.id,
+      sender_id,
+      receiver_id
     });
+
+    return response.status(201).json(transfer);
   }
 }
 
